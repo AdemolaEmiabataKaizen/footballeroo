@@ -6,3 +6,4 @@ export { profileRouter } from './profile';
 export { voiceRouter } from './voice';
 export { adminRouter } from './admin';
 export { simulateRouter } from './simulate';
+export { imagesRouter } from './images';

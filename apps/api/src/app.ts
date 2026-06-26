@@ -13,6 +13,7 @@ import { profileRouter } from './routes/profile';
 import { voiceRouter } from './routes/voice';
 import { adminRouter } from './routes/admin';
 import { simulateRouter } from './routes/simulate';
+import { imagesRouter } from './routes/images';
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/profile', profileRouter);
 app.use('/api/voice', voiceRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/simulate', simulateRouter);
+app.use('/api/images', imagesRouter);
 
 // --- Error Handling ---
 app.use(notFoundHandler);

@@ -14,6 +14,7 @@ import {
 import type { GenerationContext } from './prompts';
 import type { Dish, MoodType } from '@footballeroo/shared';
 import { TASTE_SCORE, MENU_CONFIG } from '@footballeroo/shared';
+import { generateDishImage } from '../image';
 
 // ============================================================
 // Generation Engine — The brain of Footballeroo
@@ -72,7 +73,22 @@ export async function generateMatchDayMenu(
     });
 
     if (verdict.approved) {
-      approvedDishes.push(candidateToDish(candidate, verdict));
+      const dish = candidateToDish(candidate, verdict);
+
+      // 3b. Generate image for approved dish
+      try {
+        const imageResult = await generateDishImage(
+          dish.name,
+          dish.description,
+          dish.cuisine,
+        );
+        dish.imageUrl = imageResult.imageUrl;
+      } catch (err) {
+        console.error(`[GenEngine] Image generation failed for "${dish.name}":`, err);
+        // Dish still approved even without image
+      }
+
+      approvedDishes.push(dish);
     } else {
       rejected++;
     }
