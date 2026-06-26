@@ -1,0 +1,34 @@
+{
+  "name": "footballeroo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "db:generate": "npm run db:generate --workspace=@footballeroo/database",
+    "db:migrate": "npm run db:migrate --workspace=@footballeroo/database",
+    "db:seed": "npm run db:seed --workspace=@footballeroo/database",
+    "db:studio": "npm run db:studio --workspace=@footballeroo/database",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "prettier": "^3.3.0",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "npm@11.4.2",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
