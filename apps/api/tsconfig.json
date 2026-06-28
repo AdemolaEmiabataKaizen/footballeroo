@@ -2,12 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
     "module": "commonjs",
     "moduleResolution": "node",
-    "declaration": true,
+    "declaration": false,
+    "skipLibCheck": true,
     "paths": {
-      "@footballeroo/shared": ["../../packages/shared/src"]
+      "@footballeroo/shared": ["../../packages/shared/src"],
+      "@footballeroo/database": ["../../packages/database/src"]
     }
   },
   "include": ["src/**/*"],

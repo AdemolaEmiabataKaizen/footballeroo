@@ -123,6 +123,8 @@ export FOOTBALL_API_KEY="..."           # optional
 ./scripts/deploy.sh deploy-infra
 ```
 
+Application code is deployed by packaging as a tarball, uploading to the S3 bucket, and extracting on the instance via SSM. The API is bundled with esbuild; the frontend uses Next.js standalone output. PM2 manages both processes.
+
 To connect to the instance:
 
 ```bash

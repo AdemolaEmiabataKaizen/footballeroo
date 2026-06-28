@@ -379,7 +379,7 @@ Resources:
   ApiTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckPath: /health
+      HealthCheckPath: /api/health
       Port: 4000
       Protocol: HTTP
       TargetType: instance

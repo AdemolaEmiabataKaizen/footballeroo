@@ -32,7 +32,7 @@ export function validateEnv(): void {
   const required: (keyof typeof env)[] = [];
 
   if (env.NODE_ENV === 'production') {
-    required.push('OPENAI_API_KEY', 'JWT_SECRET', 'DATABASE_URL');
+    required.push('JWT_SECRET', 'DATABASE_URL');
   }
 
   const missing = required.filter((key) => !env[key]);
