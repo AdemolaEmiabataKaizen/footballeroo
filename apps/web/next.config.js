@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   transpilePackages: ['@footballeroo/shared'],
+  turbopack: {
+    root: '../../',
+  },
   images: {
     remotePatterns: [
       {

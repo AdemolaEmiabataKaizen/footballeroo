@@ -1,8 +1,9 @@
 # Footballeroo
 
 **Working title:** Footballeroo (brand) · "Mood Food" (core feature)  
-**Status:** concept / pre-spec  
-**Intended build tool:** Kiro (spec-driven)
+**Status:** deployed  
+**Live URL:** http://production-footballeroo-alb-2107404732.us-east-1.elb.amazonaws.com  
+**Built with:** Kiro (spec-driven development)
 
 ---
 
@@ -56,7 +57,135 @@ Stock levels   ┘                                                              
 
 ---
 
-## 4. User stories (seed set)
+## 4. Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 14, React 18, Tailwind CSS, Framer Motion |
+| Backend API | Express.js, Socket.io (real-time) |
+| Database | PostgreSQL 16 (via Prisma ORM) |
+| AI/Agents | OpenAI (generation engine, taste officer, DALL-E image gen) |
+| Monorepo | Turborepo, npm workspaces |
+| Language | TypeScript throughout |
+
+---
+
+## 5. Project Structure
+
+```
+footballeroo/
+├── apps/
+│   ├── api/          # Express API server (port 4000)
+│   └── web/          # Next.js frontend (port 3000)
+├── packages/
+│   ├── database/     # Prisma schema, migrations, client
+│   └── shared/       # Shared types and utilities
+├── infrastructure/   # CloudFormation template
+├── scripts/          # Deployment and setup scripts
+└── .kiro/            # Kiro specs and agent config
+```
+
+---
+
+## 6. Infrastructure & Deployment
+
+### Architecture decisions
+
+The application is deployed on **AWS (us-east-1)** using a single EC2 instance behind an Application Load Balancer. This approach was chosen over ECS/Fargate because:
+
+- **No Docker dependency** — simplifies the build and deploy pipeline
+- **WebSocket support** — Socket.io for real-time football event streaming works natively with a long-running Node.js process
+- **Cost-effective for demo** — a single `t3.small` handles both the API and frontend
+- **Simpler debugging** — SSM Session Manager gives direct access to the instance
+
+### AWS resources (managed by CloudFormation)
+
+| Resource | Purpose |
+|----------|---------|
+| VPC + 2 public/2 private subnets | Network isolation |
+| Application Load Balancer | Routes `/api/*` and `/socket.io/*` → API (4000), everything else → Web (3000) |
+| EC2 instance (t3.small) | Runs API + Web via PM2 |
+| RDS PostgreSQL (db.t4g.micro) | Application database |
+| S3 Bucket | Stores AI-generated food images |
+| IAM Role + Instance Profile | Grants EC2 access to S3 and SSM |
+
+### Deploying
+
+Prerequisites: AWS CLI configured, required env vars set.
+
+```bash
+export DB_PASSWORD="your-db-password"
+export JWT_SECRET="your-jwt-secret"
+export NEXTAUTH_SECRET="your-nextauth-secret"
+export OPENAI_API_KEY="sk-..."          # optional
+export FOOTBALL_API_KEY="..."           # optional
+
+./scripts/deploy.sh deploy-infra
+```
+
+Application code is deployed by packaging as a tarball, uploading to the S3 bucket, and extracting on the instance via SSM. The API is bundled with esbuild; the frontend uses Next.js standalone output. PM2 manages both processes.
+
+To connect to the instance:
+
+```bash
+./scripts/deploy.sh ssh
+```
+
+---
+
+## 7. Local Development
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL (or use a managed instance)
+- npm
+
+### Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Copy environment file and fill in values
+cp .env.example .env
+
+# Generate Prisma client
+npm run db:generate
+
+# Run database migrations
+npm run db:migrate
+
+# Start development servers (API + Web)
+npm run dev
+```
+
+The web app will be available at `http://localhost:3000` and the API at `http://localhost:4000`.
+
+---
+
+## 8. Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `JWT_SECRET` | Yes | Secret for signing auth tokens |
+| `NEXTAUTH_SECRET` | Yes | NextAuth.js session encryption |
+| `NEXTAUTH_URL` | Yes | Base URL of the web app |
+| `OPENAI_API_KEY` | No* | Powers generation engine, taste officer, and image generation |
+| `FOOTBALL_API_KEY` | No* | Live football data from football-data.org |
+| `MOCK_FOOTBALL_DATA` | No | Set `"true"` to use mocked fixture data |
+| `GOOGLE_CLIENT_ID` | No | Google OAuth sign-in |
+| `GOOGLE_CLIENT_SECRET` | No | Google OAuth sign-in |
+| `AWS_S3_BUCKET` | No | S3 bucket for generated food images |
+| `AWS_REGION` | No | AWS region for S3 |
+| `REDIS_URL` | No | Redis for caching (optional in dev) |
+
+*Required for AI features to work. The app runs without them but agents won't generate content.
+
+---
+
+## 9. User Stories
 
 1. As a football fan, I want the menu to reflect tonight's match so my order fits the occasion.
 2. As a user, I want to describe or request a dish and see a unique photo and recipe for it, so I can try something genuinely new.
@@ -67,33 +196,12 @@ Stock levels   ┘                                                              
 
 ---
 
-## 5. The demo: wow moment
-
-Everything funnels toward one moment: a user describes or requests a dish (or the system proposes one off a live result), and a unique, never-seen-before food photo appears alongside an appetising recipe — vetted by the taste officer.
-
-### Suggested demo scope (keep the supporting systems light):
-
-- Live football and stock can be small mocked datasets feeding real prompts.
-- The taste officer can start as a lightweight LLM critic scoring combinations.
-- The generated image + recipe is the part that should genuinely shine on screen.
-
----
-
-## 6. Open decisions (resolve before/within Kiro spec)
+## 10. Open Decisions
 
 - **Live-football data source** — real fixtures/results API vs. mocked match data for the demo.
 - **Image generation** — which model produces the food pics; how to keep them appetising and visually consistent.
 - **Taste officer design** — rules layer, LLM critic scoring combinations, or both.
 - **Custom order fulfilment** — is "ordering" a custom dish real or simulated in the demo, given a generated dish has no real supply chain yet.
-- **Naming** — recommendation: keep Footballeroo as the brand; use Mood Food as the feature/tagline, not the product name.
-
----
-
-## 7. Next steps
-
-1. Decide demo scope vs. full-vision scope.
-2. Resolve the open decisions above.
-3. Use this document to seed Kiro's requirements / design / tasks docs.
 
 ---
 
